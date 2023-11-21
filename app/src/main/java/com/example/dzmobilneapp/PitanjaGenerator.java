@@ -1,5 +1,11 @@
 package com.example.dzmobilneapp;
 
+import java.lang.reflect.Array;
+import java.time.chrono.ChronoLocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 import java.util.Random;
 
 public class PitanjaGenerator {
@@ -38,5 +44,21 @@ public class PitanjaGenerator {
         Random random = new Random();
         int randomId = random.nextInt(PITANJA.length);
         return PITANJA[randomId];
+    }
+
+    public static List<KvizPitanje> getShuffledPitanjaArray() {
+        //Deklaracija novog array-a i random
+        int len = PITANJA.length;
+        ArrayList<KvizPitanje> arrayToShuffle = new ArrayList<>(Arrays.asList(PITANJA));
+        List<KvizPitanje> shuffledArray = new ArrayList<>();
+        Random random = new Random(new Date().getTime());
+
+        //Izmješaj originalni array
+        while (len > 0) {
+            KvizPitanje temp = arrayToShuffle.remove(random.nextInt(len--));
+            shuffledArray.add(temp);
+        }
+
+        return shuffledArray;
     }
 }

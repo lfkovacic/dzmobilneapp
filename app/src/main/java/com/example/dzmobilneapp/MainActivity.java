@@ -3,14 +3,18 @@ package com.example.dzmobilneapp;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import java.util.List;
+import java.util.logging.Logger;
+
 public class MainActivity extends AppCompatActivity {
 
-    private static final int DELAY_5_SECONDS = 5000;
+    private static final int DELAY_IN_MS = 2000;
     private TextView textPitanje;
     private TextView textOdgovor;
     private TextView textBodovi;
@@ -18,8 +22,8 @@ public class MainActivity extends AppCompatActivity {
     private Button buttonNetocno;
     private ImageButton buttonSljedece;
     private ImageButton buttonPrethodno;
-    private PitanjaGenerator pitanjaGenerator;
-
+    private List<KvizPitanje> pitanjaArray;
+    private int currentPitanjeIndex;
     private KvizPitanje currentPitanje;
     private int score;
 
@@ -28,6 +32,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        pitanjaArray = PitanjaGenerator.getShuffledPitanjaArray();
+        currentPitanjeIndex = 0;
+
         //Veži id-jeve
 
         textPitanje = findViewById(R.id.textPitanje);
@@ -35,8 +42,8 @@ public class MainActivity extends AppCompatActivity {
         textBodovi = findViewById(R.id.textBodovi);
         buttonTocno = findViewById(R.id.buttonTocno);
         buttonNetocno = findViewById(R.id.buttonNetocno);
-        //buttonPrethodno = findViewById(R.id.buttonPrethodno);
-        //buttonSljedece = findViewById(R.id.buttonSljedece);
+        buttonPrethodno = findViewById(R.id.buttonPrethodno);
+        buttonSljedece = findViewById(R.id.buttonSljedece);
 
         //Inicijalno postavi bodove na 0 i prikaži bodove
 
@@ -45,13 +52,26 @@ public class MainActivity extends AppCompatActivity {
 
         //Veži event listenere na gumbe
 
+        buttonPrethodno.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                getPreviousPitanje();
+            }
+        });
+        buttonSljedece.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                getNextPitanje();
+            }
+        });
+
         buttonTocno.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
                 checkAnswer(true); //Korisnik je odabrao "točno"
                 updateTextOdgovor();
                 updateBodovi();
-                delayAndGetNextPitanje(DELAY_5_SECONDS);
+                delayAndGetNextPitanje(DELAY_IN_MS);
             }
         });
         buttonNetocno.setOnClickListener(new View.OnClickListener(){
@@ -60,14 +80,23 @@ public class MainActivity extends AppCompatActivity {
                 checkAnswer(false); //Korisnik je odabrao "netočno"
                 updateTextOdgovor();
                 updateBodovi();
-                delayAndGetNextPitanje(DELAY_5_SECONDS);
+                delayAndGetNextPitanje(DELAY_IN_MS);
             }
         });
         getNextPitanje();
     }
 
     protected void getNextPitanje(){ //Dohvaća sljedeće pitanje, briše prethodni odgovor
-        currentPitanje = PitanjaGenerator.getRandomPitanje();
+        int numPitanja = pitanjaArray.size();
+        currentPitanjeIndex = ++currentPitanjeIndex%numPitanja;
+        currentPitanje = pitanjaArray.get(currentPitanjeIndex);
+        clearTextOdgovor();
+        updateTextPitanje();
+    }
+    protected void getPreviousPitanje() {
+        int numPitanja = pitanjaArray.size();
+        currentPitanjeIndex = (--currentPitanjeIndex+numPitanja)%numPitanja;
+        currentPitanje = pitanjaArray.get(currentPitanjeIndex); //Java misli da je -1%25 = -1...
         clearTextOdgovor();
         updateTextPitanje();
     }
@@ -85,7 +114,10 @@ public class MainActivity extends AppCompatActivity {
         textBodovi.setText("Bodovi: "+score);
     }
     protected void checkAnswer(boolean answer){ //Provjerava je li korisnikov odgovor točan i ažurira broj bodova
-        if (answer == currentPitanje.getTrue()) score++;
+        if (!currentPitanje.getAnswered()){
+            if (answer == currentPitanje.getTrue()) score++;
+            currentPitanje.setAnswered(true);
+        }
     }
     private void delayAndGetNextPitanje(int delayMillis) { //Nakon određene stanke dohvaća sljedeće pitanje
         //Onemogući korisnikov unos
