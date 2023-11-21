@@ -57,15 +57,6 @@
             android:text="Netočno" />
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/textBodovi"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="185dp"
-        android:text="TextView" />
-
     <LinearLayout
         android:layout_width="230dp"
         android:layout_height="59dp"
@@ -88,5 +79,15 @@
             android:layout_weight="1"
             app:srcCompat="@drawable/right_arrow" />
     </LinearLayout>
+
+    <RelativeLayout
+        android:id="@+id/bodoviFragmentContainer"
+        android:layout_width="334dp"
+        android:layout_height="105dp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="96dp"
+        android:elevation="8dp"
+        android:orientation="vertical" />
 
 </RelativeLayout>
